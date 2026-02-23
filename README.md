@@ -23,11 +23,16 @@ A native macOS clipboard history manager. Lives in the menu bar, tracks everythi
 ## Build & Run
 
 ```
-swift build
-swift run Clippy
+make run
 ```
 
-The process detaches from the terminal automatically — your shell is returned immediately.
+This builds a release binary, packages it into `Clippy.app`, and launches it. To install to `/Applications`:
+
+```
+make install
+```
+
+For development you can also use `swift run Clippy` directly, but the app bundle is needed for macOS to attribute permissions to Clippy rather than your terminal.
 
 ## Permissions
 
