@@ -3,9 +3,11 @@ import SwiftUI
 struct ClipboardPanelView: View {
     @ObservedObject var clipboardManager: ClipboardManager
     @ObservedObject var selectionState: SelectionState
+    @ObservedObject var settings: SettingsStore
     let onSelect: (ClipboardEntry) -> Void
     let onDelete: (ClipboardEntry) -> Void
     let onDismiss: () -> Void
+    @State private var showSettings = false
 
     private var filteredEntries: [ClipboardEntry] {
         clipboardManager.filteredEntries(searchText: selectionState.searchText)
@@ -21,10 +23,22 @@ struct ClipboardPanelView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            SearchBarView(searchText: $selectionState.searchText)
-                .onChange(of: selectionState.searchText) { _ in
-                    selectionState.selectedIndex = 0
+            HStack(spacing: 8) {
+                SearchBarView(searchText: $selectionState.searchText)
+                Button(action: { showSettings.toggle() }) {
+                    Image(systemName: "gearshape")
+                        .font(.system(size: 14))
+                        .foregroundColor(.secondary)
                 }
+                .buttonStyle(.plain)
+                .popover(isPresented: $showSettings) {
+                    SettingsView(settings: settings)
+                }
+                .padding(.trailing, 12)
+            }
+            .onChange(of: selectionState.searchText) { _ in
+                selectionState.selectedIndex = 0
+            }
 
             Divider()
                 .padding(.horizontal, 12)

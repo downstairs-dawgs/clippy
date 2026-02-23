@@ -8,12 +8,14 @@ final class ClipboardManager: ObservableObject {
     private var timer: Timer?
     private var lastChangeCount: Int
     private let maxEntries = 100
+    private let settings: SettingsStore
 
     /// Set to true when we're writing to the pasteboard ourselves,
     /// so we don't re-capture our own paste-back.
     var isWriting = false
 
-    init() {
+    init(settings: SettingsStore) {
+        self.settings = settings
         lastChangeCount = NSPasteboard.general.changeCount
     }
 
@@ -47,6 +49,8 @@ final class ClipboardManager: ObservableObject {
     }
 
     private func addEntry(_ content: ClipboardContent) {
+        guard settings.isWithinItemLimit(content.byteSize) else { return }
+
         // Deduplicate: remove existing entry with same content
         switch content {
         case .text(let newText):
@@ -63,10 +67,23 @@ final class ClipboardManager: ObservableObject {
         let entry = ClipboardEntry(content: content)
         entries.insert(entry, at: 0)
 
-        // Trim to max
+        // Trim to max count
         if entries.count > maxEntries {
             entries = Array(entries.prefix(maxEntries))
         }
+
+        evictForTotalSize()
+    }
+
+    private func evictForTotalSize() {
+        guard case .limited(let limit) = settings.maxTotalSize else { return }
+        while totalByteSize() > limit && entries.count > 1 {
+            entries.removeLast()
+        }
+    }
+
+    private func totalByteSize() -> Int {
+        entries.reduce(0) { $0 + $1.byteSize }
     }
 
     func deleteEntry(id: UUID) {

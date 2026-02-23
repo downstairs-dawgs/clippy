@@ -4,6 +4,7 @@ import SwiftUI
 final class FloatingPanelController {
     private var panel: FloatingPanel?
     private let clipboardManager: ClipboardManager
+    private let settings: SettingsStore
     private let panelWidth: CGFloat = 700
     private let panelHeight: CGFloat = 450
     private var localMonitor: Any?
@@ -11,8 +12,9 @@ final class FloatingPanelController {
     /// Tracks which entry is selected via keyboard navigation.
     let selectionState = SelectionState()
 
-    init(clipboardManager: ClipboardManager) {
+    init(clipboardManager: ClipboardManager, settings: SettingsStore) {
         self.clipboardManager = clipboardManager
+        self.settings = settings
     }
 
     var isVisible: Bool {
@@ -83,6 +85,7 @@ final class FloatingPanelController {
         let rootView = ClipboardPanelView(
             clipboardManager: clipboardManager,
             selectionState: selectionState,
+            settings: settings,
             onSelect: { [weak self] entry in
                 self?.pasteEntry(entry)
             },

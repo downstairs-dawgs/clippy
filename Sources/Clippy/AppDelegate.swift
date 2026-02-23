@@ -4,7 +4,8 @@ import SwiftUI
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
-    private let clipboardManager = ClipboardManager()
+    private let settingsStore = SettingsStore()
+    private var clipboardManager: ClipboardManager!
     private var hotkeyManager: HotkeyManager!
     private var panelController: FloatingPanelController!
 
@@ -12,7 +13,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         promptForAccessibility()
         setupStatusItem()
 
-        panelController = FloatingPanelController(clipboardManager: clipboardManager)
+        clipboardManager = ClipboardManager(settings: settingsStore)
+        panelController = FloatingPanelController(
+            clipboardManager: clipboardManager,
+            settings: settingsStore
+        )
 
         hotkeyManager = HotkeyManager { [weak self] in
             self?.togglePanel()
