@@ -40,6 +40,11 @@ final class FloatingPanelController {
 
         installKeyMonitor()
         panel.makeKeyAndOrderFront(nil)
+
+        // Focus the search field after the SwiftUI view is laid out
+        DispatchQueue.main.async {
+            self.focusSearchField()
+        }
     }
 
     func hide() {
@@ -101,6 +106,21 @@ final class FloatingPanelController {
     private func pasteEntry(_ entry: ClipboardEntry) {
         hide()
         PasteHelper.paste(entry: entry, clipboardManager: clipboardManager)
+    }
+
+    private func focusSearchField() {
+        guard let contentView = panel?.contentView else { return }
+        // Find the NSTextField inside the SwiftUI hosting view
+        func findTextField(in view: NSView) -> NSTextField? {
+            if let tf = view as? NSTextField, tf.isEditable { return tf }
+            for sub in view.subviews {
+                if let found = findTextField(in: sub) { return found }
+            }
+            return nil
+        }
+        if let textField = findTextField(in: contentView) {
+            panel?.makeFirstResponder(textField)
+        }
     }
 
     // MARK: - Key handling
