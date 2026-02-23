@@ -28,7 +28,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     /// Prompt user to grant Accessibility permission (needed for global hotkey and paste simulation).
+    /// Only shows the system dialog if the app hasn't already been granted access.
     private func promptForAccessibility() {
+        if AXIsProcessTrusted() { return }
         let key = kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String
         let options = [key: true] as CFDictionary
         AXIsProcessTrustedWithOptions(options)
