@@ -1,58 +1,72 @@
+import Carbon
 import AppKit
 
 final class HotkeyManager {
-    private let handler: () -> Void
-    private var globalMonitor: Any?
-    private var localMonitor: Any?
+    private var hotKeyRef: EventHotKeyRef?
+    private var eventHandlerRef: EventHandlerRef?
+
+    // Static so the C function pointer callback can reach it
+    fileprivate static var handler: (() -> Void)?
 
     init(handler: @escaping () -> Void) {
-        self.handler = handler
+        HotkeyManager.handler = handler
     }
 
     func register() {
-        // Global monitor: fires when another app is frontmost
-        globalMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { [weak self] event in
-            self?.handleEvent(event)
-        }
+        var eventType = EventTypeSpec(
+            eventClass: OSType(kEventClassKeyboard),
+            eventKind: UInt32(kEventHotKeyPressed)
+        )
 
-        // Local monitor: fires when our own app is frontmost
-        localMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
-            if self?.handleEvent(event) == true {
-                return nil // Consume the event
-            }
-            return event
-        }
+        InstallEventHandler(
+            GetApplicationEventTarget(),
+            hotkeyEventHandler,
+            1,
+            &eventType,
+            nil,
+            &eventHandlerRef
+        )
+
+        // Cmd+Shift+V
+        let hotKeyID = EventHotKeyID(
+            signature: OSType(0x434C5059), // "CLPY"
+            id: 1
+        )
+
+        RegisterEventHotKey(
+            UInt32(kVK_ANSI_V),
+            UInt32(cmdKey | shiftKey),
+            hotKeyID,
+            GetApplicationEventTarget(),
+            0,
+            &hotKeyRef
+        )
     }
 
     func unregister() {
-        if let monitor = globalMonitor {
-            NSEvent.removeMonitor(monitor)
-            globalMonitor = nil
+        if let ref = hotKeyRef {
+            UnregisterEventHotKey(ref)
+            hotKeyRef = nil
         }
-        if let monitor = localMonitor {
-            NSEvent.removeMonitor(monitor)
-            localMonitor = nil
+        if let ref = eventHandlerRef {
+            RemoveEventHandler(ref)
+            eventHandlerRef = nil
         }
-    }
-
-    @discardableResult
-    private func handleEvent(_ event: NSEvent) -> Bool {
-        // Cmd+Shift+V
-        let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
-        let isCmd = flags.contains(.command)
-        let isShift = flags.contains(.shift)
-        let isV = event.keyCode == 9 // 'V' key
-
-        if isCmd && isShift && isV {
-            DispatchQueue.main.async { [weak self] in
-                self?.handler()
-            }
-            return true
-        }
-        return false
     }
 
     deinit {
         unregister()
     }
+}
+
+// Top-level function so it can be used as a C function pointer
+private func hotkeyEventHandler(
+    _ nextHandler: EventHandlerCallRef?,
+    _ event: EventRef?,
+    _ userData: UnsafeMutableRawPointer?
+) -> OSStatus {
+    DispatchQueue.main.async {
+        HotkeyManager.handler?()
+    }
+    return noErr
 }

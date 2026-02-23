@@ -1,4 +1,5 @@
 import AppKit
+import ApplicationServices
 import SwiftUI
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
@@ -8,6 +9,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var panelController: FloatingPanelController!
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        promptForAccessibility()
         setupStatusItem()
 
         panelController = FloatingPanelController(clipboardManager: clipboardManager)
@@ -18,6 +20,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         hotkeyManager.register()
 
         clipboardManager.startPolling()
+    }
+
+    /// Prompt user to grant Accessibility permission (needed for global hotkey and paste simulation).
+    private func promptForAccessibility() {
+        let key = kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String
+        let options = [key: true] as CFDictionary
+        AXIsProcessTrustedWithOptions(options)
     }
 
     private func setupStatusItem() {

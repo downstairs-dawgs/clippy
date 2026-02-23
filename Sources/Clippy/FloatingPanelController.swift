@@ -1,11 +1,12 @@
 import AppKit
 import SwiftUI
 
-final class FloatingPanelController: FloatingPanelKeyHandler {
+final class FloatingPanelController {
     private var panel: FloatingPanel?
     private let clipboardManager: ClipboardManager
     private let panelWidth: CGFloat = 700
     private let panelHeight: CGFloat = 450
+    private var localMonitor: Any?
 
     /// Tracks which entry is selected via keyboard navigation.
     let selectionState = SelectionState()
@@ -36,17 +37,43 @@ final class FloatingPanelController: FloatingPanelKeyHandler {
         positionPanel(panel)
         selectionState.selectedIndex = 0
         selectionState.searchText = ""
+
+        installKeyMonitor()
         panel.makeKeyAndOrderFront(nil)
     }
 
     func hide() {
+        removeKeyMonitor()
         panel?.orderOut(nil)
     }
+
+    // MARK: - Key event monitor
+
+    /// Local event monitor intercepts key events before the responder chain,
+    /// so Escape/arrows/Enter work even when the search field has focus.
+    private func installKeyMonitor() {
+        removeKeyMonitor()
+        localMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            guard let self = self, self.isVisible else { return event }
+            if self.handleKeyDown(event) {
+                return nil // consumed
+            }
+            return event
+        }
+    }
+
+    private func removeKeyMonitor() {
+        if let monitor = localMonitor {
+            NSEvent.removeMonitor(monitor)
+            localMonitor = nil
+        }
+    }
+
+    // MARK: - Panel setup
 
     private func createPanel() {
         let contentRect = NSRect(x: 0, y: 0, width: panelWidth, height: panelHeight)
         let floatingPanel = FloatingPanel(contentRect: contentRect)
-        floatingPanel.keyHandler = self
 
         let rootView = ClipboardPanelView(
             clipboardManager: clipboardManager,
@@ -76,9 +103,9 @@ final class FloatingPanelController: FloatingPanelKeyHandler {
         PasteHelper.paste(entry: entry, clipboardManager: clipboardManager)
     }
 
-    // MARK: - FloatingPanelKeyHandler
+    // MARK: - Key handling
 
-    func handleKeyDown(_ event: NSEvent) -> Bool {
+    private func handleKeyDown(_ event: NSEvent) -> Bool {
         let filtered = clipboardManager.filteredEntries(searchText: selectionState.searchText)
 
         switch Int(event.keyCode) {

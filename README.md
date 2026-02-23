@@ -27,14 +27,11 @@ swift build
 swift run Clippy
 ```
 
+The process detaches from the terminal automatically — your shell is returned immediately.
+
 ## Permissions
 
-On first launch, macOS will prompt for:
-
-- **Input Monitoring** — required for the global Cmd+Shift+V hotkey
-- **Accessibility** — required for simulating Cmd+V paste-back
-
-Grant both in System Settings → Privacy & Security.
+On first launch, macOS will prompt for **Accessibility** access (needed for the global hotkey and paste simulation). Grant it in System Settings → Privacy & Security → Accessibility.
 
 ## Usage
 
