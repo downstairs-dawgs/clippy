@@ -14,7 +14,7 @@ struct SearchBarView: View {
         .padding(10)
         .background(Color(nsColor: .controlBackgroundColor))
         .cornerRadius(8)
-        .padding(.horizontal, 12)
+        .padding(.leading, 12)
         .padding(.top, 12)
         .padding(.bottom, 4)
     }

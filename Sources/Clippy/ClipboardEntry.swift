@@ -4,6 +4,15 @@ import Foundation
 enum ClipboardContent {
     case text(String)
     case image(NSImage)
+
+    var byteSize: Int {
+        switch self {
+        case .text(let string):
+            return string.utf8.count
+        case .image(let image):
+            return image.tiffRepresentation?.count ?? 0
+        }
+    }
 }
 
 struct ClipboardEntry: Identifiable {
@@ -24,6 +33,8 @@ struct ClipboardEntry: Identifiable {
             return "[Image]"
         }
     }
+
+    var byteSize: Int { content.byteSize }
 
     var relativeTimestamp: String {
         let formatter = RelativeDateTimeFormatter()
