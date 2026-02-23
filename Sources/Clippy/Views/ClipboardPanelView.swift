@@ -34,7 +34,7 @@ struct ClipboardPanelView: View {
                 HStack(spacing: 0) {
                     ClipboardListView(
                         entries: filteredEntries,
-                        selectedIndex: $selectionState.selectedIndex,
+                        selectionState: selectionState,
                         onSelect: onSelect
                     )
                     .frame(width: 260)

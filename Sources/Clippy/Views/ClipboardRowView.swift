@@ -2,7 +2,12 @@ import SwiftUI
 
 struct ClipboardRowView: View {
     let entry: ClipboardEntry
-    let isSelected: Bool
+    let index: Int
+    @ObservedObject var selectionState: SelectionState
+
+    private var isSelected: Bool {
+        index == selectionState.selectedIndex
+    }
 
     var body: some View {
         HStack(spacing: 8) {

@@ -6,7 +6,7 @@ enum ClipboardContent {
     case image(NSImage)
 }
 
-final class ClipboardEntry: Identifiable, ObservableObject {
+struct ClipboardEntry: Identifiable {
     let id = UUID()
     let content: ClipboardContent
     let timestamp: Date
@@ -22,23 +22,6 @@ final class ClipboardEntry: Identifiable, ObservableObject {
             return string.trimmingCharacters(in: .whitespacesAndNewlines)
         case .image:
             return "[Image]"
-        }
-    }
-
-    var isText: Bool {
-        if case .text = content { return true }
-        return false
-    }
-
-    var isImage: Bool {
-        if case .image = content { return true }
-        return false
-    }
-
-    var iconName: String {
-        switch content {
-        case .text: return "doc.on.doc"
-        case .image: return "photo"
         }
     }
 
