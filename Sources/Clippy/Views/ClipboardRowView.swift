@@ -6,9 +6,8 @@ struct ClipboardRowView: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            Image(systemName: entry.iconName)
-                .foregroundColor(.secondary)
-                .frame(width: 16)
+            entryIcon
+                .frame(width: 28, height: 28)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(entry.displayText)
@@ -31,5 +30,19 @@ struct ClipboardRowView: View {
                 .fill(isSelected ? Color.accentColor.opacity(0.2) : Color.clear)
         )
         .contentShape(Rectangle())
+    }
+
+    @ViewBuilder
+    private var entryIcon: some View {
+        switch entry.content {
+        case .text:
+            Image(systemName: "doc.on.doc")
+                .foregroundColor(.secondary)
+        case .image(let nsImage):
+            Image(nsImage: nsImage)
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .clipShape(RoundedRectangle(cornerRadius: 4))
+        }
     }
 }

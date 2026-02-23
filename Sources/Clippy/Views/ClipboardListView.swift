@@ -8,15 +8,15 @@ struct ClipboardListView: View {
     var body: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                LazyVStack(spacing: 2) {
+                VStack(spacing: 2) {
                     ForEach(Array(entries.enumerated()), id: \.element.id) { index, entry in
                         ClipboardRowView(entry: entry, isSelected: index == selectedIndex)
-                            .id(index)
-                            .onTapGesture {
-                                selectedIndex = index
-                            }
+                            .id(entry.id)
                             .onTapGesture(count: 2) {
                                 onSelect(entry)
+                            }
+                            .onTapGesture(count: 1) {
+                                selectedIndex = index
                             }
                     }
                 }
@@ -24,8 +24,9 @@ struct ClipboardListView: View {
                 .padding(.vertical, 4)
             }
             .onChange(of: selectedIndex) { newIndex in
+                guard newIndex >= 0 && newIndex < entries.count else { return }
                 withAnimation(.easeInOut(duration: 0.15)) {
-                    proxy.scrollTo(newIndex, anchor: .center)
+                    proxy.scrollTo(entries[newIndex].id, anchor: .center)
                 }
             }
         }

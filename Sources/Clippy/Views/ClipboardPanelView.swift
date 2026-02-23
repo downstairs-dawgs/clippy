@@ -31,16 +31,18 @@ struct ClipboardPanelView: View {
             if filteredEntries.isEmpty {
                 emptyState
             } else {
-                HSplitView {
+                HStack(spacing: 0) {
                     ClipboardListView(
                         entries: filteredEntries,
                         selectedIndex: $selectionState.selectedIndex,
                         onSelect: onSelect
                     )
-                    .frame(minWidth: 220, idealWidth: 260, maxWidth: 320)
+                    .frame(width: 260)
+
+                    Divider()
 
                     ClipboardDetailView(entry: selectedEntry)
-                        .frame(minWidth: 250)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
             }
         }

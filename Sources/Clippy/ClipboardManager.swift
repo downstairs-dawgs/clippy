@@ -37,18 +37,12 @@ final class ClipboardManager: ObservableObject {
 
         guard !isWriting else { return }
 
-        if let image = NSImage(pasteboard: pasteboard),
-           pasteboard.types?.contains(.tiff) == true || pasteboard.types?.contains(.png) == true {
-            // Check if there's also string content – prefer text if it looks like plain text was copied
-            if let string = pasteboard.string(forType: .string),
-               !string.isEmpty,
-               pasteboard.types?.first == .string {
-                addEntry(.text(string))
-            } else {
-                addEntry(.image(image))
-            }
-        } else if let string = pasteboard.string(forType: .string), !string.isEmpty {
+        // Prefer text when available; only capture as image when there's no string content
+        // (e.g. screenshots, copied images from Preview/Photoshop).
+        if let string = pasteboard.string(forType: .string), !string.isEmpty {
             addEntry(.text(string))
+        } else if let image = NSImage(pasteboard: pasteboard) {
+            addEntry(.image(image))
         }
     }
 
