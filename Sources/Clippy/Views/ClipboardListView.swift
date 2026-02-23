@@ -4,6 +4,7 @@ struct ClipboardListView: View {
     let entries: [ClipboardEntry]
     @ObservedObject var selectionState: SelectionState
     let onSelect: (ClipboardEntry) -> Void
+    let onDelete: (ClipboardEntry) -> Void
 
     var body: some View {
         ScrollViewReader { proxy in
@@ -12,6 +13,11 @@ struct ClipboardListView: View {
                     ForEach(Array(entries.enumerated()), id: \.element.id) { index, entry in
                         ClipboardRowView(entry: entry, index: index, selectionState: selectionState)
                             .id(entry.id)
+                            .contextMenu {
+                                Button("Delete") {
+                                    onDelete(entry)
+                                }
+                            }
                             .onTapGesture(count: 2) {
                                 onSelect(entry)
                             }
