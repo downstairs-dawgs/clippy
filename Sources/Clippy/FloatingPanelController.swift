@@ -86,6 +86,9 @@ final class FloatingPanelController {
             onSelect: { [weak self] entry in
                 self?.pasteEntry(entry)
             },
+            onDelete: { [weak self] entry in
+                self?.deleteEntry(entry)
+            },
             onDismiss: { [weak self] in
                 self?.hide()
             }
@@ -106,6 +109,14 @@ final class FloatingPanelController {
     private func pasteEntry(_ entry: ClipboardEntry) {
         hide()
         PasteHelper.paste(entry: entry, clipboardManager: clipboardManager)
+    }
+
+    private func deleteEntry(_ entry: ClipboardEntry) {
+        clipboardManager.deleteEntry(id: entry.id)
+        let remaining = clipboardManager.filteredEntries(searchText: selectionState.searchText)
+        if selectionState.selectedIndex >= remaining.count && remaining.count > 0 {
+            selectionState.selectedIndex = remaining.count - 1
+        }
     }
 
     private func focusSearchField() {
@@ -145,6 +156,11 @@ final class FloatingPanelController {
         case 36: // Return/Enter
             if selectionState.selectedIndex >= 0 && selectionState.selectedIndex < filtered.count {
                 pasteEntry(filtered[selectionState.selectedIndex])
+            }
+            return true
+        case 51 where event.modifierFlags.contains(.command): // Cmd+Backspace
+            if selectionState.selectedIndex >= 0 && selectionState.selectedIndex < filtered.count {
+                deleteEntry(filtered[selectionState.selectedIndex])
             }
             return true
         default:

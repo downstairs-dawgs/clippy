@@ -69,6 +69,10 @@ final class ClipboardManager: ObservableObject {
         }
     }
 
+    func deleteEntry(id: UUID) {
+        entries.removeAll { $0.id == id }
+    }
+
     func filteredEntries(searchText: String) -> [ClipboardEntry] {
         guard !searchText.isEmpty else { return entries }
         return entries.filter { entry in

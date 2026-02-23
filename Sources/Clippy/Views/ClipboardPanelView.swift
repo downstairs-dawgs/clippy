@@ -4,6 +4,7 @@ struct ClipboardPanelView: View {
     @ObservedObject var clipboardManager: ClipboardManager
     @ObservedObject var selectionState: SelectionState
     let onSelect: (ClipboardEntry) -> Void
+    let onDelete: (ClipboardEntry) -> Void
     let onDismiss: () -> Void
 
     private var filteredEntries: [ClipboardEntry] {
@@ -35,7 +36,8 @@ struct ClipboardPanelView: View {
                     ClipboardListView(
                         entries: filteredEntries,
                         selectionState: selectionState,
-                        onSelect: onSelect
+                        onSelect: onSelect,
+                        onDelete: onDelete
                     )
                     .frame(width: 260)
 
