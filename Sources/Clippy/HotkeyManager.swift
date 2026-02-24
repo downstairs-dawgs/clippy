@@ -12,7 +12,7 @@ final class HotkeyManager {
         HotkeyManager.handler = handler
     }
 
-    func register() {
+    func register(keyCode: UInt32 = UInt32(kVK_ANSI_V), modifiers: UInt32 = UInt32(cmdKey | shiftKey)) {
         var eventType = EventTypeSpec(
             eventClass: OSType(kEventClassKeyboard),
             eventKind: UInt32(kEventHotKeyPressed)
@@ -27,20 +27,24 @@ final class HotkeyManager {
             &eventHandlerRef
         )
 
-        // Cmd+Shift+V
         let hotKeyID = EventHotKeyID(
             signature: OSType(0x434C5059), // "CLPY"
             id: 1
         )
 
         RegisterEventHotKey(
-            UInt32(kVK_ANSI_V),
-            UInt32(cmdKey | shiftKey),
+            keyCode,
+            modifiers,
             hotKeyID,
             GetApplicationEventTarget(),
             0,
             &hotKeyRef
         )
+    }
+
+    func reregister(keyCode: UInt32, modifiers: UInt32) {
+        unregister()
+        register(keyCode: keyCode, modifiers: modifiers)
     }
 
     func unregister() {
