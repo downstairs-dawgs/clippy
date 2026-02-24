@@ -9,9 +9,9 @@
     <key>CFBundleDisplayName</key>
     <string>Clippy</string>
     <key>CFBundleVersion</key>
-    <string>1.0</string>
+    <string>0.0.0-dev</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.0</string>
+    <string>0.0.0-dev</string>
     <key>LSUIElement</key>
     <true/>
     <key>NSHumanReadableCopyright</key>

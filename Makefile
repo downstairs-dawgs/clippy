@@ -7,6 +7,7 @@ build:
 	mkdir -p $(APP)/Contents/MacOS
 	cp .build/release/Clippy $(APP)/Contents/MacOS/
 	cp Resources/Info.plist $(APP)/Contents/
+	codesign --force --sign - $(APP)
 
 run: build
 	open $(APP)
