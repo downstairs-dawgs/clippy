@@ -1,5 +1,6 @@
 import AppKit
 import ApplicationServices
+import Combine
 import SwiftUI
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
@@ -8,6 +9,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var clipboardManager: ClipboardManager!
     private var hotkeyManager: HotkeyManager!
     private var panelController: FloatingPanelController!
+    private var shortcutCancellable: AnyCancellable?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         promptForAccessibility()
@@ -22,7 +24,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         hotkeyManager = HotkeyManager { [weak self] in
             self?.togglePanel()
         }
-        hotkeyManager.register()
+        let initial = settingsStore.shortcut
+        hotkeyManager.register(keyCode: initial.keyCode, modifiers: initial.modifiers)
+
+        shortcutCancellable = settingsStore.$shortcut
+            .dropFirst()
+            .sink { [weak self] newShortcut in
+                self?.hotkeyManager.reregister(keyCode: newShortcut.keyCode, modifiers: newShortcut.modifiers)
+            }
 
         clipboardManager.startPolling()
     }
